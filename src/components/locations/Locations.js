@@ -1,12 +1,19 @@
 import { Button, Card, Col, Empty, Layout, Row, Select, Space } from 'antd'
 import useActions from '../../hooks/useActions';
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useState } from 'react';
 import ClientForm from './ClientForm';
+import UnbindModal from './UnbindModal';
 
 
 const Locations = () => {
+
+  const flatType = {
+    HOUSE: 1,
+    ENTRANCE: 2,
+    FLAT: 3
+  }
 
   const [fields, setFields] = useState({
     location: null,
@@ -27,6 +34,8 @@ const Locations = () => {
 
   const { Option } = Select
 
+  const dispatch = useDispatch()
+
   useEffect(() => {
     getLocations()
   }, [])
@@ -38,10 +47,12 @@ const Locations = () => {
   }, [modalContent])
 
   const onChangeLocation = value => {
+    dispatch({ type: 'clients/set.items', data: [] })
     getHouses(value)
     setFields({ ...fields, location: value, house: null, number: null })
   }
   const onChangeHouse = value => {
+    dispatch({ type: 'clients/set.items', data: [] })
     getHouseFlats(value)
     setFields({ ...fields, house: value, number: null })
   }
@@ -53,19 +64,21 @@ const Locations = () => {
     setModalContent(<ClientForm flatID={fields.number} setModalContent={setModalContent} />)
   }
 
-  /*
-  bindId: 5276
-  email: "adgik1234@gmail.com"
-  id: 5920
-  name: "Бобров Олег Михайлович"
-  phone: "9825187665"*/
+  const unbindClient = client => {
+    const flat = houseFlatItems.find(item => item.id === fields.number)
+    setModalContent(<UnbindModal flat={flat} client={client} setModalContent={setModalContent} />)
+  }
+
+  const editClient = client => {
+    setModalContent(<ClientForm client={client} setModalContent={setModalContent} />)
+  }
 
   return (
     <Layout className='main'>
       {modalContent}
       <Space>
         <Select
-          style={{ width: 200 }}
+          style={{ minWidth: 200 }}
           onChange={value => onChangeLocation(value)}
           loading={isLocationLoading}
           showSearch
@@ -84,6 +97,7 @@ const Locations = () => {
         </Select>
 
         <Select
+          style={{ minWidth: 200 }}
           onChange={value => onChangeHouse(value)}
           disabled={fields.location === null}
           loading={isHousesLoading}
@@ -102,6 +116,7 @@ const Locations = () => {
           })}
         </Select>
         <Select
+          style={{ minWidth: 200 }}
           onChange={value => onChangeHouseFlat(value)}
           disabled={fields.house === null}
           loading={isHouseFlatsLoading}
@@ -113,7 +128,7 @@ const Locations = () => {
               option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
           }>
           {houseFlatItems.map(houseFlat => {
-            return <Option key={houseFlat.id} value={houseFlat.id}>{houseFlat.name}</Option>
+            return <Option disabled={houseFlat.typeId !== flatType.FLAT} key={houseFlat.id} value={houseFlat.id}>{houseFlat.name}</Option>
           })}
         </Select>
         <Button
@@ -128,8 +143,8 @@ const Locations = () => {
               <Card title={client.name} bordered={false} className='my-card'>
                 <p>{client.phone}</p>
                 <p>{client.email}</p>
-                <Button type='danger' style={{marginRight: 10}}>Отвязать</Button>
-                <Button type='primary'>Изменить</Button>
+                <Button type='danger' onClick={() => unbindClient(client)} style={{ marginRight: 10 }}>Отвязать</Button>
+                <Button type='primary' onClick={() => editClient(client)}>Изменить</Button>
               </Card>
             </Col>
           })}

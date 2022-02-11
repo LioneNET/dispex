@@ -3,7 +3,7 @@ import { useState } from 'react';
 import useApi from './../../hooks/useApi';
 
 
-const ClientForm = ({ item = null, flatID, setModalContent }) => {
+const ClientForm = ({ client = null, flatID = null, setModalContent }) => {
 
   const [form] = Form.useForm()
   const $api = useApi()
@@ -16,28 +16,38 @@ const ClientForm = ({ item = null, flatID, setModalContent }) => {
   }
 
   const [fields, setFields] = useState({
-    name: '',
-    email: '',
-    phone: ''
+    Name: client ? client.name : '',
+    Email: client ? client.email : '',
+    Phone: client ? client.phone : ''
   })
 
   const onFinish = () => {
-    console.log(fields)
-    $api.post('HousingStock/client', {
-      Name: fields.name,
-      Phone: fields.phone,
-      Email: fields.email,
-      BindId: flatID
-    })
-      .then(res => {
-        $api.put('/HousingStock/bind_client', {
-          AddressId: flatID,
-          ClientId: res.data.id
-        })
-          .then(() => {
-            setModalContent(false)
-          })
+    if (client) {
+      $api.post('HousingStock/client', {
+        Id: client.id,
+        Name: fields.Name,
+        Phone: fields.Phone,
+        Email: fields.Email
       })
+      .then(() => {
+        setModalContent(false)
+      })
+    } else {
+      $api.post('HousingStock/client', {
+        Name: fields.Name,
+        Phone: fields.Phone,
+        Email: fields.Email
+      })
+        .then(res => {
+          $api.put('/HousingStock/bind_client', {
+            AddressId: flatID,
+            ClientId: res.data.id
+          })
+            .then(() => {
+              setModalContent(false)
+            })
+        })
+    }
   }
   return (
     <Modal
@@ -49,14 +59,14 @@ const ClientForm = ({ item = null, flatID, setModalContent }) => {
         name="nest-messages"
         validateMessages={validateMessages}
         onFinish={onFinish}>
-        <Form.Item name={['user', 'name']} label="Имя клиента">
-          <Input onChange={e => setFields({ ...fields, name: e.target.value })} />
+        <Form.Item name={['user', 'name']} label="Имя клиента" initialValue={fields.Name}>
+          <Input onChange={e => setFields({ ...fields, Name: e.target.value })} />
         </Form.Item>
-        <Form.Item name={['user', 'email']} label="Email" rules={[{ type: 'email' }]}>
-          <Input onChange={e => setFields({ ...fields, email: e.target.value })} />
+        <Form.Item name={['user', 'email']} label="Email" rules={[{ type: 'email' }]} initialValue={fields.Email}>
+          <Input onChange={e => setFields({ ...fields, Email: e.target.value })} />
         </Form.Item>
-        <Form.Item name={['user', 'phone']} label="Номер телефона" rules={[{ required: true }]}>
-          <Input onChange={e => setFields({ ...fields, phone: e.target.value })} />
+        <Form.Item name={['user', 'phone']} label="Номер телефона" rules={[{ required: true }]} initialValue={fields.Phone}>
+          <Input onChange={e => setFields({ ...fields, Phone: e.target.value })} />
         </Form.Item>
       </Form>
     </Modal>
