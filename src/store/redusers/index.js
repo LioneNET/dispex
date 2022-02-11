@@ -1,9 +1,13 @@
-import locations from './locations';
-import HousingStock from './HousingStock';
+import locations from './locationsReduser'
+import houses from './housesReduser'
+import houseFlats from './houseFlatsReduser'
+import clients from './clientsReduser'
 
 const redusers = {
-    HousingStock,
-    locations
+  locations,
+  houses,
+  houseFlats,
+  clients
 }
 
 export default redusers

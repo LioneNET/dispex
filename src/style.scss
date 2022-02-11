@@ -1,4 +1,4 @@
-@import 'antd/dist/antd.css';
+@import "antd/dist/antd.css";
 
 * {
     margin: 0px;
@@ -34,4 +34,14 @@ body {
     width: 350px;
     margin: 0 auto;
     margin-top: 30px;
+}
+
+.my-card {
+    padding: 5px;
+    border: 1px solid #ebebeb;
+    margin-bottom: 5px;
+}
+
+.site-card-wrapper {
+    margin-top: 20px;
 }
