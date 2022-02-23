@@ -7,14 +7,6 @@ const useApi = () => {
     baseURL: apiConfig.baseAPI
   })
 
-  $api.interceptors.response.use(response => {
-    return response
-  })
-
-  $api.interceptors.request.use(request => {
-    return request
-  })
-
   return $api
 }
 

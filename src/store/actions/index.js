@@ -1,13 +1,13 @@
 import getLocations from './getLocations'
 import getHouses from './getHouses'
 import getHouseFlats from './getHouseFlats'
-import getClients from './getClients'
+import Clients from './Clients'
 
 const allActions = {
   getLocations,
   getHouses,
   getHouseFlats,
-  getClients
+  ...Clients
 }
 
 export default allActions

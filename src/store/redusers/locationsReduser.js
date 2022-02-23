@@ -1,14 +1,19 @@
+import locationTypes from "../actionTypes/locationTypes"
+
 const initState = {
   isLoading: false,
-  items: []
+  items: [],
+  error: false
 }
 
 const locationsReduser = (state = initState, action) => {
   switch (action.type) {
-    case 'locations/set.is.loading':
+    case locationTypes.loading:
       return { ...state, isLoading: action.data }
-    case 'locations/set.items':
+    case locationTypes.items:
       return { ...state, items: action.data }
+    case locationTypes.error:
+      return { ...state, error: action.data }
     default:
       return state
   }

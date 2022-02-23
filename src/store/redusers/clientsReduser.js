@@ -1,14 +1,19 @@
+import clientsTypes from "../actionTypes/clientsTypes"
+
 const initState = {
     isLoading: false,
-    items: []
+    items: [],
+    error: false
   }
   
   const clientsReduser = (state = initState, action) => {
     switch (action.type) {
-      case 'clients/set.is.loading':
+      case clientsTypes.loading:
         return { ...state, isLoading: action.data }
-      case 'clients/set.items':
+      case clientsTypes.items:
         return { ...state, items: action.data }
+      case clientsTypes.error:
+        return { ...state, error: action.data }
       default:
         return state
     }

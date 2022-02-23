@@ -1,17 +1,23 @@
 import useApi from "../../hooks/useApi"
+import housesTypes from "../actionTypes/housesTypes"
 
-const loadingStart = () => ({ type: 'houses/set.is.loading', data: true })
-const loadingEnd = () => ({ type: 'houses/set.is.loading', data: false })
-const setHouses = data => ({ type: 'houses/set.items', data })
+const loadingStart = () => ({ type: housesTypes.loading, data: true })
+const loadingEnd = () => ({ type: housesTypes.loading, data: false })
+const setHouses = data => ({ type: housesTypes.items, data })
+const setError = data => ({ type: housesTypes.error, data })
 
-const getHouses = id => dispatch => {
-  dispatch(loadingStart())
+const getHouses = id => async dispatch => {
   const $api = useApi()
-  $api.get(`Request/houses/${id}`)
-    .then(resp => {
-      dispatch(setHouses(resp.data))
-    })
-    .finally(() => dispatch(loadingEnd()))
+  dispatch(loadingStart())
+  dispatch(setError(false))
+  try {
+    const response = await $api.get(`Request/houses/${id}`)
+    dispatch(setHouses(response.data))
+  } catch {
+    dispatch(setError('Ошибка загрузки домов'))
+  } finally {
+    dispatch(loadingEnd())
+  }
 }
 
 export default getHouses

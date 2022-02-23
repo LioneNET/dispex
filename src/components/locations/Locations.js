@@ -1,8 +1,7 @@
-import { Button, Card, Col, Empty, Layout, Row, Select, Space } from 'antd'
+import { Button, Card, Col, Empty, Layout, message, Row, Select, Space } from 'antd'
 import useActions from '../../hooks/useActions';
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import ClientForm from './ClientForm';
 import UnbindModal from './UnbindModal';
 
@@ -15,57 +14,70 @@ const Locations = () => {
     FLAT: 3
   }
 
-  const [fields, setFields] = useState({
-    location: null,
-    house: null,
-    number: null
-  })
+  const [location, setLocation] = useState(null)
+  const [house, setHouse] = useState(null)
+  const [number, setNumber] = useState(null)
+
   const [modalContent, setModalContent] = useState(false)
 
-  const { getLocations, getHouses, getHouseFlats, getClients } = useActions()
+  const { getLocations, getHouses, getHouseFlats, getClients, setClients } = useActions()
   const isLocationLoading = useSelector(state => state.locations.isLoading)
   const locationItems = useSelector(state => state.locations.items)
   const isHousesLoading = useSelector(state => state.houses.isLoading)
   const houseItems = useSelector(state => state.houses.items)
   const isHouseFlatsLoading = useSelector(state => state.houseFlats.isLoading)
   const houseFlatItems = useSelector(state => state.houseFlats.items)
-  const isLoadingClients = useSelector(state => state.clients.isLoading)
   const clientItems = useSelector(state => state.clients.items)
 
-  const { Option } = Select
+  const clientError = useSelector(state => state.clients.error)
+  const houseFlatError = useSelector(state => state.houseFlats.error)
+  const housesError = useSelector(state => state.houses.error)
+  const locationsError = useSelector(state => state.locations.error)
 
-  const dispatch = useDispatch()
+  const { Option } = Select;
 
   useEffect(() => {
     getLocations()
   }, [])
 
   useEffect(() => {
-    if (fields.number) {
-      getClients(fields.number)
+    [clientError, houseFlatError, housesError, locationsError].forEach(error => {
+      if (error) {
+        message.error(error)
+      }
+    })
+  }, [clientError, houseFlatError, housesError, locationsError])
+
+  useEffect(() => {
+    if (number) {
+      getClients(number)
     }
   }, [modalContent])
 
   const onChangeLocation = value => {
-    dispatch({ type: 'clients/set.items', data: [] })
+    setClients([])
+    setLocation(value)
+    setHouse(null)
+    setNumber(null)
     getHouses(value)
-    setFields({ ...fields, location: value, house: null, number: null })
   }
   const onChangeHouse = value => {
-    dispatch({ type: 'clients/set.items', data: [] })
+    setClients([])
     getHouseFlats(value)
-    setFields({ ...fields, house: value, number: null })
+    setHouse(value)
+    setNumber(null)
   }
+
   const onChangeHouseFlat = value => {
     getClients(value)
-    setFields({ ...fields, number: value })
+    setNumber(value)
   }
   const addClientHandler = () => {
-    setModalContent(<ClientForm flatID={fields.number} setModalContent={setModalContent} />)
+    setModalContent(<ClientForm flatID={number} setModalContent={setModalContent} />)
   }
 
   const unbindClient = client => {
-    const flat = houseFlatItems.find(item => item.id === fields.number)
+    const flat = houseFlatItems.find(item => item.id === number)
     setModalContent(<UnbindModal flat={flat} client={client} setModalContent={setModalContent} />)
   }
 
@@ -99,7 +111,7 @@ const Locations = () => {
         <Select
           style={{ minWidth: 200 }}
           onChange={value => onChangeHouse(value)}
-          disabled={fields.location === null}
+          disabled={location === null || housesError}
           loading={isHousesLoading}
           showSearch
           placeholder="Дом"
@@ -115,10 +127,11 @@ const Locations = () => {
             return <Option key={house.id} value={house.id}>{house.name}</Option>
           })}
         </Select>
+
         <Select
           style={{ minWidth: 200 }}
           onChange={value => onChangeHouseFlat(value)}
-          disabled={fields.house === null}
+          disabled={house === null || houseFlatError}
           loading={isHouseFlatsLoading}
           showSearch
           placeholder="Квартира"
@@ -134,7 +147,7 @@ const Locations = () => {
         <Button
           onClick={addClientHandler}
           type='primary'
-          disabled={fields.number === null}>Добавить</Button>
+          disabled={number === null || houseFlatError}>Добавить</Button>
       </Space>
       <div className="site-card-wrapper">
         <Row gutter={16}>

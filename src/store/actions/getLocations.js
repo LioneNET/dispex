@@ -1,17 +1,22 @@
 import useApi from "../../hooks/useApi"
+import locationTypes from "../actionTypes/locationTypes"
+const loadingStart = () => ({ type: locationTypes.loading, data: true })
+const loadingEnd = () => ({ type: locationTypes.loading, data: false })
+const setLocations = data => ({ type: locationTypes.items, data })
+const setError = data => ({ type: locationTypes.error, data })
 
-const loadingStart = () => ({ type: 'locations/set.is.loading', data: true })
-const loadingEnd = () => ({ type: 'locations/set.is.loading', data: false })
-const setLocations = data => ({ type: 'locations/set.items', data })
-
-const getLocations = () => dispatch => {
+const getLocations = () => async dispatch => {
   const $api = useApi()
   dispatch(loadingStart())
-  $api.get('Request/streets')
-    .then(resp => {
-      dispatch(setLocations(resp.data))
-    })
-    .finally(() => dispatch(loadingEnd()))
+  dispatch(setError(false))
+  try {
+    const response = await $api.get('Request/streets')
+    dispatch(setLocations(response.data))
+  } catch {
+    dispatch(setError('Ошибка загрузки улиц'))
+  } finally {
+    dispatch(loadingEnd())
+  }
 }
 
 export default getLocations

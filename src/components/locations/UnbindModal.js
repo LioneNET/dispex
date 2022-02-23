@@ -1,16 +1,13 @@
 import Modal from "antd/lib/modal/Modal"
-import useApi from "../../hooks/useApi"
+import useActions from './../../hooks/useActions'
 
 const UnbindModal = ({client, flat, setModalContent}) => {
 
-  const $api = useApi()
+  const { unbindClient } = useActions()
 
-  const onApply = () => {
-    console.log(client)
-    $api.delete(`HousingStock/bind_client/${client.bindId}`)
-    .then(() => {
-      setModalContent(false)
-    })
+  const onApply = async () => {
+    await unbindClient(client.bindId)
+    setModalContent(false)
   }
 
   return (
